@@ -21,22 +21,25 @@ mongoose.connect(ConnectionString).then(
 
 app.use (bodyParser.json())
 
-app.use ((req,res,next)=>{
+app.use((req, res, next) => {
+    const token = req.header("Authorization")?.replace("Bearer ", "");
+    // console.log(token)
 
-    const token = req.header("Authorization")?.replace("Bearer ","")
-
-    if (token != null){
-        jwt.verify(token, "bbc", (err,decoded)=>{
-            if(decoded != null){
-                req.user = decoded
-                console.log(decoded)
-                next()
+    if (token != null) {
+        jwt.verify(token, "bbc", (err, decoded) => {
+            if (err) {
+                return res.status(401).json({ message: "Invalid token" }); 
             }
-        })
-    }else{
-        next()
+            if (decoded) {
+                req.user = decoded;
+                next(); 
+            }
+        });
+    } else {
+        next(); 
     }
-})
+});
+
 
 app.use ("/api/users",userRoute)
 app.use ("/api/gallery",galleryItemRoute)

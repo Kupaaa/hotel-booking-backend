@@ -4,7 +4,7 @@ import { createUser, loginUser, deleteUser, updateUser, getUser} from '../contro
 
 const userRouter = express.Router()
 
-userRouter.post("/",createUser)
+userRouter.post("/", createUser)
 userRouter.post("/login", loginUser)
 userRouter.delete("/", deleteUser)
 userRouter.put("/", updateUser)
