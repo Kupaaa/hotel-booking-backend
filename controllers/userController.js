@@ -1,6 +1,9 @@
 import User from "../models/user.js"
 import jwt from 'jsonwebtoken'
 import argon2 from 'argon2'
+import dotenv from 'dotenv'
+
+dotenv.config();
 
 // Function to create a new user
 export const createUser = async (req, res) => {
@@ -63,7 +66,7 @@ export const loginUser = async (req, res) => {
         };
 
         // Sign the JWT token
-        const token = jwt.sign(payload, "bbc", { expiresIn: "14h" });
+        const token = jwt.sign(payload, process.env.JWT_KEY, { expiresIn: "14h" });
 
         res.json({
             message: "User logged in successfully.",
