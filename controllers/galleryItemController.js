@@ -1,27 +1,36 @@
 import GalleryItem from "../models/galleryItem.js";
+import { isAdminValid, isLoggedIn } from "../services/checkRole.js";
+
 
 // Function to create a gallery item
 export const createGalleryItem = async (req, res) => {
     try {
-        const user = req.user;
-
-        if (!user) {
+        if (!isLoggedIn(req)) {
             return res.status(403).json({
                 message: "Please login to create a gallery item."
             });
         }
 
-        if (user.type !== "admin") {
+        if (!isAdminValid(req)) {
             return res.status(403).json({
                 message: "You don't have permission to create a gallery item."
             });
         }
 
+        const galleryItem = req.body.GalleryItem || {}; 
+
         // Validate GalleryItem structure
-        const galleryItem = req.body.GalleryItem;
-        if (!galleryItem || !galleryItem.name || !galleryItem.image || !galleryItem.description) {
+        if (!galleryItem.name || !galleryItem.image || !galleryItem.description) {
             return res.status(400).json({
                 message: "Gallery item must include name, image, and description."
+            });
+        }
+
+        // Check if the gallery item with the same name already exists
+        const existingItem = await GalleryItem.findOne({ name: galleryItem.name });
+        if (existingItem) {
+            return res.status(400).json({
+                message: "A gallery item with this name already exists."
             });
         }
 
@@ -62,13 +71,13 @@ export const deleteGalleryItem = async (req, res) => {
     try {
         const user = req.user;
 
-        if (!user) {
+        if (!isLoggedIn(req)) {
             return res.status(403).json({
                 message: "Please log in to delete a gallery item."
             });
         }
 
-        if (user.type !== "admin") {
+        if (!isAdminValid(req)) {
             return res.status(403).json({
                 message: "You do not have permission to delete a gallery item."
             });
@@ -106,15 +115,16 @@ export const deleteGalleryItem = async (req, res) => {
 // Function to update a gallery item
 export const updateGalleryItem = async (req, res) => {
     try {
+        
         const user = req.user;
 
-        if (!user) {
+        if (!isLoggedIn(req)) {
             return res.status(403).json({
                 message: "Please log in to update a gallery item."
             });
         }
 
-        if (user.type !== "admin") {
+        if (!isAdminValid(req)) {
             return res.status(403).json({
                 message: "You do not have permission to update a gallery item."
             });
