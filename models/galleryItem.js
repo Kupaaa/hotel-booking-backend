@@ -18,5 +18,5 @@ const galleryItemSchema = mongoose.Schema(
     },
 );
 
-const GalleryItem = mongoose.model("GalleryItem", galleryItemSchema);
+const GalleryItem = mongoose.model("GalleryItems", galleryItemSchema);
 export default GalleryItem;
