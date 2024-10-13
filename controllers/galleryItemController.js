@@ -50,10 +50,20 @@ export const createGalleryItem = async (req, res) => {
     }
 };
 
-// Function to retrieve gallery items
+// Function to get all gallery items
 export const getGalleryItem = async (req, res) => {
     try {
+        // Retrieve all gallery items from the database
         const list = await GalleryItem.find();
+
+        // Check if the list is empty
+        if (list.length === 0) {
+            return res.status(404).json({
+                message: "No gallery items found."
+            });
+        }
+
+        // Respond with the list of gallery items
         res.status(200).json({
             list: list,
         });
