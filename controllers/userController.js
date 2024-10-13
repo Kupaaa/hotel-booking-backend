@@ -10,23 +10,40 @@ export const createUser = async (req, res) => {
     try {
         const userData = req.body;
 
-        // Check if password exists
-        if(!userData.password) {
+        if (!userData.password) {
             return res.status(400).json({
-                message: "Password is required." 
+                message: "Password is required."
+            });
+        }
+
+        // Validate required fields
+        if (!userData.email || !userData.firstName || !userData.lastName || !userData.phone) {
+            return res.status(400).json({
+                message: "Email, first name, last name, and phone are required."
+            });
+        }
+
+        // Check if user already exists by email
+        const existingUser = await User.findOne({ email: userData.email });
+        if (existingUser) {
+            return res.status(400).json({
+                message: "User with this email already exists."
             });
         }
 
         // Hash the password
-        const passwordHash = await argon2.hash(userData.password)
-        userData.password = passwordHash
+        const passwordHash = await argon2.hash(userData.password);
+        userData.password = passwordHash;
 
-        const newUser = new User(userData)
-        await newUser.save()
+        // Create and save the new user
+        const newUser = new User(userData);
+        await newUser.save();
+
         res.status(201).json({
             message: "User created successfully."
         });
     } catch (error) {
+        console.error(error); 
         res.status(500).json({
             message: "User creation failed.",
             error: error.message

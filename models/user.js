@@ -8,7 +8,6 @@ const userSchema = mongoose.Schema(
             unique : true
         },
         emailVerified : {
-
             type : Boolean,
             required : true,
             default : false

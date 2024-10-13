@@ -1,26 +1,27 @@
 import Category from "../models/category.js"; 
 import { isAdminValid, isLoggedIn } from "../services/checkRole.js";
 
+// Function to create a new category
 export const createCategory = async (req, res) => {
     try {
         if (!isLoggedIn(req)) {
             return res.status(403).json({
-                message: "Please login to create a category."
+                message: "Please login to create a category." 
             });
         }
 
         if (!isAdminValid(req)) {
             return res.status(403).json({
-                message: "You don't have permission to create a category."
+                message: "You don't have permission to create a category." 
             });
         }
-        
+
         const category = req.body || {};
 
-        // Validate required fields
+        // Validate required fields 
         if (!category.name || !category.price || !category.features || !category.description || !category.image) {
             return res.status(400).json({
-                message: "Category must include name, price, features, description, and image."
+                message: "Category must include name, price, features, description, and image." 
             });
         }
 
@@ -28,7 +29,7 @@ export const createCategory = async (req, res) => {
         const existingItem = await Category.findOne({ name: category.name });
         if (existingItem) {
             return res.status(400).json({
-                message: "A category with this name already exists."
+                message: "A category with this name already exists." 
             });
         }
 
@@ -37,13 +38,60 @@ export const createCategory = async (req, res) => {
         await newCategory.save();
 
         return res.status(200).json({
-            message: "Category created successfully."
+            message: "Category created successfully." 
         });
     } catch (error) {
-        console.error(error);
+        console.error(error); 
         return res.status(500).json({
-            message: "Category creation failed.",
-            error: error.message
+            message: "Category creation failed.", 
+            error: error.message 
+        });
+    }
+};
+
+// Function to delete category
+export const deleteCategory = async (req, res) => {
+    try {
+        if (!isLoggedIn(req)) {
+            return res.status(403).json({
+                message: "Please log in to delete a category." 
+            });
+        }
+
+        if (!isAdminValid(req)) {
+            return res.status(403).json({
+                message: "You do not have permission to delete a category." 
+            });
+        }
+
+        const name = req.params.name;
+
+        // Validate that the category name is provided
+        if (!name) {
+            return res.status(400).json({
+                message: "Category item name is required." 
+            });
+        }
+
+        // Attempt to delete the category by its name
+        const deletedCategory = await Category.findOneAndDelete({ name: name });
+
+        // Check if the category was found and deleted
+        if (!deletedCategory) {
+            return res.status(404).json({
+                message: "Category not found." // Not found error
+            });
+        }
+
+        return res.status(200).json({
+            message: "Category deleted successfully." 
+        });
+
+    } catch (error) {
+        console.error("Error deleting category:", error); 
+        return res.status(500).json({
+            message: "Category deletion failed.", 
+            error: error.message 
         });
     }
 };
