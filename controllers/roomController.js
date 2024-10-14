@@ -108,3 +108,52 @@ export const findRoomById = async (req, res) => {
     }
 }
 
+// Function to delete a room
+export const deleteRoom = async (req, res) => {
+    try {
+        // Check if the user is logged in
+        if (!isLoggedIn(req)) {
+            return res.status(403).json({
+                message: "Please log in to delete a room." 
+            });
+        }
+
+        // Check if the logged-in user has admin permissions
+        if (!isAdminValid(req)) {
+            return res.status(403).json({
+                message: "You do not have permission to delete a room." 
+            });
+        }
+
+        const roomId = req.params.roomId;
+
+        // Check if roomId is provided
+        if (!roomId) {
+            return res.status(400).json({
+                message: "Room ID is required."
+            });
+        }
+
+        // Find and delete the room
+        const deletedRoom = await Room.findOneAndDelete({ roomId: roomId });
+
+        // Check if the room was found and deleted
+        if (!deletedRoom) {
+            return res.status(404).json({
+                message: "Room not found."
+            });
+        }
+
+        // Return success message
+        return res.status(200).json({
+            message: "Room deleted successfully." 
+        });
+
+    } catch (error) {
+        console.log(error);
+        return res.status(500).json({
+            message: "Failed to delete room.",
+            error: error.message
+        });
+    }
+}
