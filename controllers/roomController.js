@@ -157,3 +157,59 @@ export const deleteRoom = async (req, res) => {
         });
     }
 }
+
+
+// Function to update a room by ID
+export const updateRoom = async (req, res) => {
+    try {
+        // Check if the user is logged in
+        if (!isLoggedIn(req)) {
+            return res.status(403).json({
+                message: "Please log in to update a room."
+            });
+        }
+
+        // Check if the user has admin permissions
+        if (!isAdminValid(req)) {
+            return res.status(403).json({
+                message: "You do not have permission to update a room."
+            });
+        }
+
+        const roomId = req.params.roomId;
+
+        // Validate roomId
+        if (!roomId) {
+            return res.status(400).json({
+                message: "Room ID is required."
+            });
+        }
+
+        // Update the room
+        const updatedRoom = await Room.findOneAndUpdate(
+            { roomId: roomId },
+            req.body,
+            { new: true } // Returns the updated document
+        );
+
+        // Check if the room was found and updated
+        if (!updatedRoom) {
+            return res.status(404).json({
+                message: "Room not found."
+            });
+        }
+
+        // Return success response with updated room
+        return res.status(200).json({
+            message: "Room updated successfully.",
+            room: updatedRoom
+        });
+
+    } catch (error) {
+        console.log(error);
+        return res.status(500).json({
+            message: "Room update failed.",
+            error: error.message
+        });
+    }
+};
