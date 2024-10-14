@@ -79,7 +79,6 @@ export const getGalleryItem = async (req, res) => {
 // Function to delete a gallery item
 export const deleteGalleryItem = async (req, res) => {
     try {
-        const user = req.user;
 
         if (!isLoggedIn(req)) {
             return res.status(403).json({
@@ -126,8 +125,6 @@ export const deleteGalleryItem = async (req, res) => {
 export const updateGalleryItem = async (req, res) => {
     try {
         
-        const user = req.user;
-
         if (!isLoggedIn(req)) {
             return res.status(403).json({
                 message: "Please log in to update a gallery item."

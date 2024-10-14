@@ -158,3 +158,64 @@ export const getCategoryByName = async (req, res) => {
         });
     }
 };
+
+// Function to update category
+export const updateCategory = async (req, res) => {
+    try {
+        // Check if the user is logged in
+        if (!isLoggedIn(req)) {
+            return res.status(403).json({
+                message: "Please log in to update a category."
+            });
+        }
+
+        // Check if the logged-in user has admin permissions
+        if (!isAdminValid(req)) {
+            return res.status(403).json({
+                message: "You do not have permission to update a category."
+            });
+        }
+
+        const categoryName = req.body.name;
+
+        // Ensure category name is provided
+        if (!categoryName) {
+            return res.status(400).json({
+                message: "Category name is required."
+            });
+        }
+
+        // Find the category by its name
+        const category = await Category.findOne({ name: categoryName });
+
+        if (!category) {
+            return res.status(404).json({
+                message: "Category not found."
+            });
+        }
+
+        // Destructure the new category data from req.body
+        const { name, price, features, description, image } = req.body;
+
+        // Update fields if provided
+        if (name) category.name = name;
+        if (price) category.price = price;
+        if (features) category.features = features;
+        if (description) category.description = description;
+        if (image) category.image = image;
+
+        // Save the updated category
+        await category.save();
+
+        res.status(200).json({
+            message: "Category updated successfully.",
+        });
+
+    } catch (error) {
+        console.error(error);
+        return res.status(500).json({
+            message: "Category update failed.",
+            error: error.message
+        });
+    }
+};
