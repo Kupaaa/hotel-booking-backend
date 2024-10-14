@@ -70,3 +70,41 @@ export const getRoom = async (req, res) => {
         });
     }
 }
+
+// Function to retrieve a room by its ID
+export const findRoomById = async (req, res) => {
+    try {
+        // Use req.params instead of req.parms
+        const roomId = req.params.roomId; 
+
+        // Check if roomId is provided
+        if (!roomId) {
+            return res.status(400).json({
+                message: "Room ID is required"
+            });
+        }
+
+        // Correctly find the room by ID
+        const room = await Room.findOne({ roomId: roomId }); 
+
+        // Check if the room exists
+        if (!room) {
+            return res.status(404).json({
+                message: "Room not found"
+            });
+        }
+
+        // Return the found room
+        return res.status(200).json({
+            room: room
+        });
+
+    } catch (error) {
+        console.log(error);
+        return res.status(500).json({
+            message: "Failed to retrieve room",
+            error: error.message
+        });
+    }
+}
+
