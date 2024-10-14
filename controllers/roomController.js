@@ -52,3 +52,21 @@ export const createRoom = async (req, res) => {
         });
     }
 };
+
+// Function to retrieve all rooms
+export const getRoom = async (req, res) => {
+    try {
+        // Fetch all rooms from the database
+        const rooms = await Room.find(); 
+        return res.status(200).json({
+            rooms: rooms 
+        });
+
+    } catch (error) {
+        console.log(error); 
+        return res.status(500).json({
+            message: "Failed to retrieve rooms.",
+            error: error.message, 
+        });
+    }
+}
