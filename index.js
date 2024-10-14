@@ -6,6 +6,7 @@ import galleryItemRoute from './Routes/galleryItemRoute.js'
 import categoryRoute from './Routes/categoryRoute.js'
 import dotenv from 'dotenv'
 import authenticateToken from './services/authentication.js'
+import roomRoute from './Routes/roomRoute.js'
 
 
 dotenv.config();
@@ -34,6 +35,7 @@ app.use(authenticateToken);
 app.use ("/api/users", userRoute);
 app.use ("/api/gallery", galleryItemRoute);
 app.use ("/api/category", categoryRoute);
+app.use ("/api/room", roomRoute);
 
 
 
