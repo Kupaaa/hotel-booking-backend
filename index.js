@@ -7,6 +7,7 @@ import categoryRoute from "./Routes/categoryRoute.js";
 import dotenv from "dotenv";
 import authenticateToken from "./services/authentication.js";
 import roomRoute from "./Routes/roomRoute.js";
+import bookingRouter from "./Routes/bookingRoute.js";
 
 dotenv.config();
 
@@ -36,6 +37,8 @@ app.use("/api/users", userRoute); // User management routes
 app.use("/api/gallery", galleryItemRoute); // Gallery item management routes
 app.use("/api/categories", categoryRoute); // Category management routes
 app.use("/api/rooms", roomRoute); // Room management routes
+app.use("/api/booking", bookingRouter); // Booking management routes
+
 
 // Start the server and listen on port 5000
 app.listen(5000, (req, res) => {

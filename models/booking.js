@@ -14,6 +14,11 @@ const bookingSchema = mongoose.Schema({
     type: String,
     required: true,
   },
+  userType: {
+    type: String,
+    enum: ["customer", "admin"],
+    required: true,
+  },
   status: {
     type: String,
     required: true,
