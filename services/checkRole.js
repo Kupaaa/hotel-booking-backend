@@ -20,3 +20,4 @@ export function isLoggedIn(req) {
   }
   return true;
 }
+
