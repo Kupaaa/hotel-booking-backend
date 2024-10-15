@@ -1,5 +1,12 @@
-import express from 'express'
-import { createRoom, deleteRoom, findRoomById, getRoom, updateRoom } from '../controllers/roomController.js';
+import express from "express";
+import {
+  createRoom,
+  deleteRoom,
+  findRoomById,
+  getRoom,
+  getRoomByCategory,
+  updateRoom,
+} from "../controllers/roomController.js";
 
 const roomRoute = express();
 
@@ -8,8 +15,6 @@ roomRoute.get("/", getRoom);
 roomRoute.get("/:roomId", findRoomById);
 roomRoute.delete("/:roomId", deleteRoom);
 roomRoute.put("/:roomId", updateRoom);
-
-
-
+roomRoute.get("/category/:category", getRoomByCategory);
 
 export default roomRoute;
