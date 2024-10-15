@@ -10,11 +10,12 @@ import {
 
 const userRouter = express.Router();
 
-userRouter.post("/", createUser);
-userRouter.post("/login", loginUser);
-userRouter.delete("/:email", deleteUser);
-userRouter.put("/:email", updateUser);
-userRouter.get("/:email", getUserByEmail);
-userRouter.get("/", getUser);
+// Route to handle operations related to user management
+userRouter.post("/", createUser); // Route to create a new user
+userRouter.post("/login", loginUser); // Route to log in a user
+userRouter.delete("/:email", deleteUser); // Route to delete a user by their email
+userRouter.put("/:email", updateUser); // Route to update a user by their email
+userRouter.get("/:email", getUserByEmail); // Route to get a user by their email
+userRouter.get("/", getUser); // Route to get all users
 
 export default userRouter;
