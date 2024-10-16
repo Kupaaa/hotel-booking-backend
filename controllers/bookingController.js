@@ -1,30 +1,8 @@
 import Booking from "../models/booking.js";
-import {
-  isLoggedIn,
-  isCustomerValid,
-  isAdminValid,
-} from "../services/checkRole.js";
 
 // Function to create a new booking in the system
 export const createBooking = async (req, res) => {
   try {
-    // Check if the user is logged in
-    if (!isLoggedIn(req)) {
-      return res.status(403).json({
-        message: "Please log in to create a booking.",
-      });
-    }
-
-    // Check if the user is a customer or an admin
-    const isCustomer = isCustomerValid(req);
-    const isAdmin = isAdminValid(req);
-
-    if (!isCustomer && !isAdmin) {
-      return res.status(403).json({
-        message: "Only customers or admins can create bookings.",
-      });
-    }
-
     const { roomId, start, end } = req.body;
 
     if (!roomId || !start || !end) {
@@ -35,11 +13,12 @@ export const createBooking = async (req, res) => {
     }
 
     // Determine the user type
-    const userType = isCustomer ? "customer" : "admin";
+    const userType =
+      req.user && req.user.type === "customer" ? "customer" : "admin";
 
     // Count documents and create new booking
     const count = await Booking.countDocuments({});
-    const newId = 1200 + count + 1; // Alternatively, consider using UUID or ObjectId
+    const newId = 1200 + count + 1;
 
     const newBooking = new Booking({
       bookingId: newId,
@@ -67,20 +46,6 @@ export const createBooking = async (req, res) => {
 // Function to delete a booking in the system
 export const deleteBookingById = async (req, res) => {
   try {
-    // Check if the user is logged in
-    if (!isLoggedIn(req)) {
-      return res.status(403).json({
-        message: "Please log in to delete the booking.",
-      });
-    }
-
-    // Check if the user is an admin
-    if (!isAdminValid(req)) {
-      return res.status(403).json({
-        message: "You do not have permission to delete this booking.",
-      });
-    }
-
     // Get booking ID from request parameters
     const bookingId = req.params.bookingId;
     if (!bookingId) {
@@ -117,20 +82,6 @@ export const deleteBookingById = async (req, res) => {
 // Function to retrieve the list of all bookings
 export const getBooking = async (req, res) => {
   try {
-    // Check if the user is logged in
-    if (!isLoggedIn(req)) {
-      return res.status(403).json({
-        message: "Please log in to access bookings.",
-      });
-    }
-
-    // Check if the user has admin privileges
-    if (!isAdminValid(req)) {
-      return res.status(403).json({
-        message: "You do not have permission to retrieve bookings.",
-      });
-    }
-
     // Retrieve the list of bookings
     const bookingList = await Booking.find();
 
@@ -151,20 +102,6 @@ export const getBooking = async (req, res) => {
 // Function to retrieve booking by ID
 export const getBookingById = async (req, res) => {
   try {
-    // Check if the user is logged in
-    if (!isLoggedIn(req)) {
-      return res.status(403).json({
-        message: "Please log in to view booking.",
-      });
-    }
-
-    // Check if the user has admin privileges
-    if (!isAdminValid(req)) {
-      return res.status(403).json({
-        message: "You do not have permission to view this booking.",
-      });
-    }
-
     const bookingId = req.params.bookingId;
 
     if (!bookingId) {
@@ -198,20 +135,6 @@ export const getBookingById = async (req, res) => {
 // Function to update booking by ID
 export const updateBookingById = async (req, res) => {
   try {
-    // Check if the user is logged in
-    if (!isLoggedIn(req)) {
-      return res.status(403).json({
-        message: "Please log in to update a booking.",
-      });
-    }
-
-    // Check if the user has admin privileges
-    if (!isAdminValid(req)) {
-      return res.status(403).json({
-        message: "You do not have permission to update this booking.",
-      });
-    }
-
     const bookingId = req.params.bookingId;
 
     // Ensure bookingId is provided

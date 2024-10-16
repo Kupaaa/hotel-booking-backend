@@ -2,7 +2,6 @@ import User from "../models/user.js";
 import jwt from "jsonwebtoken";
 import argon2 from "argon2";
 import dotenv from "dotenv";
-import { isLoggedIn, isAdminValid } from "../services/checkRole.js";
 dotenv.config();
 
 // Function to create a new user
@@ -114,20 +113,6 @@ export const loginUser = async (req, res) => {
 // Function to delete a user
 export const deleteUser = async (req, res) => {
   try {
-    // Check if the user is logged in
-    if (!isLoggedIn(req)) {
-      return res.status(403).json({
-        message: "Please log in to delete a user.",
-      });
-    }
-
-    // Check if the logged-in user has admin permissions
-    if (!isAdminValid(req)) {
-      return res.status(403).json({
-        message: "You do not have permission to delete a user.",
-      });
-    }
-
     const email = req.params.email;
 
     // Validate email
@@ -163,20 +148,6 @@ export const deleteUser = async (req, res) => {
 // Function to update a user
 export const updateUser = async (req, res) => {
   try {
-    // Check if the user is logged in
-    if (!isLoggedIn(req)) {
-      return res.status(403).json({
-        message: "Please log in to update a user.",
-      });
-    }
-
-    // Check if the user has admin permissions
-    if (!isAdminValid(req)) {
-      return res.status(403).json({
-        message: "You do not have permission to update this user.",
-      });
-    }
-
     const email = req.params.email; // Get email from the URL parameter
 
     // Validate email
@@ -228,20 +199,6 @@ export const updateUser = async (req, res) => {
 // Function to get user list
 export const getUser = async (req, res) => {
   try {
-    // Check if the user is logged in
-    if (!isLoggedIn(req)) {
-      return res.status(403).json({
-        message: "Please log in to view the user list.",
-      });
-    }
-
-    // Check if the user has admin permissions
-    if (!isAdminValid(req)) {
-      return res.status(403).json({
-        message: "You do not have permission to view the user list.",
-      });
-    }
-
     // Fetch the user list from the database
     const usersList = await User.find();
 
@@ -262,20 +219,6 @@ export const getUser = async (req, res) => {
 // Function to retrieve a user by their email address
 export const getUserByEmail = async (req, res) => {
   try {
-    // Check if the user is logged in
-    if (!isLoggedIn(req)) {
-      return res.status(403).json({
-        message: "Please log in to view user details.",
-      });
-    }
-
-    // Check if the user has admin permissions
-    if (!isAdminValid(req)) {
-      return res.status(403).json({
-        message: "You do not have permission to view user details.",
-      });
-    }
-
     // Extract the email parameter from the request
     const email = req.params.email;
 

@@ -1,23 +1,8 @@
 import Category from "../models/category.js";
-import { isAdminValid, isLoggedIn } from "../services/checkRole.js";
 
 // Function to create a new category
 export const createCategory = async (req, res) => {
   try {
-    // Check if the user is logged in
-    if (!isLoggedIn(req)) {
-      return res.status(403).json({
-        message: "Please login to create a category.",
-      });
-    }
-
-    // Check if the logged-in user has admin permissions
-    if (!isAdminValid(req)) {
-      return res.status(403).json({
-        message: "You don't have permission to create a category.",
-      });
-    }
-
     const category = req.body || {};
 
     // Validate required fields
@@ -61,20 +46,6 @@ export const createCategory = async (req, res) => {
 // Function to delete category
 export const deleteCategory = async (req, res) => {
   try {
-    // Check if the user is logged in
-    if (!isLoggedIn(req)) {
-      return res.status(403).json({
-        message: "Please log in to delete a category.",
-      });
-    }
-
-    // Check if the logged-in user has admin permissions
-    if (!isAdminValid(req)) {
-      return res.status(403).json({
-        message: "You do not have permission to delete a category.",
-      });
-    }
-
     const name = req.params.name;
 
     // Validate that the category name is provided
@@ -164,20 +135,6 @@ export const getCategoryByName = async (req, res) => {
 // Function to update category
 export const updateCategory = async (req, res) => {
   try {
-    // Check if the user is logged in
-    if (!isLoggedIn(req)) {
-      return res.status(403).json({
-        message: "Please log in to update a category.",
-      });
-    }
-
-    // Check if the user has admin permissions
-    if (!isAdminValid(req)) {
-      return res.status(403).json({
-        message: "You do not have permission to update a category.",
-      });
-    }
-
     const categoryName = req.params.name;
 
     // Validate category name

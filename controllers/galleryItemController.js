@@ -1,24 +1,9 @@
 import GalleryItem from "../models/galleryItem.js";
-import { isAdminValid, isLoggedIn } from "../services/checkRole.js";
 
 // Function to create a gallery item
 // Function to create a new gallery item
 export const createGalleryItem = async (req, res) => {
   try {
-    // Check if the user is logged in
-    if (!isLoggedIn(req)) {
-      return res.status(403).json({
-        message: "Please login to create a gallery item.",
-      });
-    }
-
-    // Check if the user has admin privileges
-    if (!isAdminValid(req)) {
-      return res.status(403).json({
-        message: "You don't have permission to create a gallery item.",
-      });
-    }
-
     // Destructure the GalleryItem object from the request body, or use an empty object
     const galleryItem = req.body.GalleryItem || {};
 
@@ -83,20 +68,6 @@ export const getGalleryItem = async (req, res) => {
 // Function to delete a gallery item
 export const deleteGalleryItem = async (req, res) => {
   try {
-    // Check if the user is logged in
-    if (!isLoggedIn(req)) {
-      return res.status(403).json({
-        message: "Please log in to delete a gallery item.",
-      });
-    }
-
-    // Check if the user has admin privileges
-    if (!isAdminValid(req)) {
-      return res.status(403).json({
-        message: "You do not have permission to delete a gallery item.",
-      });
-    }
-
     // Get the gallery item name from the request body
     const galleryItemName = req.body.name;
 
@@ -133,20 +104,6 @@ export const deleteGalleryItem = async (req, res) => {
 // Function to update a gallery item
 export const updateGalleryItem = async (req, res) => {
   try {
-    // Check if the user is logged in
-    if (!isLoggedIn(req)) {
-      return res.status(403).json({
-        message: "Please log in to update a gallery item.",
-      });
-    }
-
-    // Check if the user has admin privileges
-    if (!isAdminValid(req)) {
-      return res.status(403).json({
-        message: "You do not have permission to update a gallery item.",
-      });
-    }
-
     // Get the gallery item name from the request body
     const galleryItemName = req.body.name;
 
