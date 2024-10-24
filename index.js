@@ -8,10 +8,16 @@ import dotenv from "dotenv";
 import authenticateToken from "./services/authentication.js";
 import roomRoute from "./Routes/roomRoute.js";
 import bookingRouter from "./Routes/bookingRoute.js";
+import cors from 'cors';
 
+// Load environment variables from the .env file
 dotenv.config();
 
+// Initialize an Express application
 const app = express();
+
+// Enable CORS (Cross-Origin Resource Sharing) for handling requests from different origins
+app.use(cors());
 
 // Database connection string from environment variables
 const ConnectionString = process.env.MONGO_URL;
