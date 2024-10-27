@@ -14,7 +14,7 @@ const authenticateToken = (req, res, next) => {
         });
       }
 
-      req.user = decoded;
+      req.body.user = decoded;
       next();
     });
   } else {

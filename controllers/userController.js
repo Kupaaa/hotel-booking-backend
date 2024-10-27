@@ -196,25 +196,25 @@ export const updateUser = async (req, res) => {
   }
 };
 
-// Function to get user list
-export const getUser = async (req, res) => {
-  try {
-    // Fetch the user list from the database
-    const usersList = await User.find();
+//  // list
+// export const getUserList = async (req, res) => {
+//   try {
+//     // Fetch the user list from the database
+//     const usersList = await User.find();
 
-    // Return success response with the list of users
-    return res.status(200).json({
-      message: "User list retrieved successfully.",
-      list: usersList,
-    });
-  } catch (error) {
-    console.error(error);
-    return res.status(500).json({
-      message: "An error occurred while retrieving the user list.",
-      error: error.message,
-    });
-  }
-};
+//     // Return success response with the list of users
+//     return res.status(200).json({
+//       message: "User list retrieved successfully.",
+//       list: usersList,
+//     });
+//   } catch (error) {
+//     console.error(error);
+//     return res.status(500).json({
+//       message: "An error occurred while retrieving the user list.",
+//       error: error.message,
+//     });
+//   }
+// };
 
 // Function to retrieve a user by their email address
 export const getUserByEmail = async (req, res) => {
@@ -252,3 +252,23 @@ export const getUserByEmail = async (req, res) => {
     });
   }
 };
+
+// Function to get user
+export async function getUser(req, res) {
+  const user = req.body.user; 
+
+  if (!user) {
+    // Respond with a "not found" message if no user is provided
+    return res.status(404).json({
+      message: "User not found",
+    });
+  } else {
+    // Respond with the found user
+    return res.status(200).json({
+      message: "User found",
+      user: user,
+    });
+  }
+}
+
+

@@ -6,17 +6,17 @@ const UserType = {
 
 // Checks if a user is logged in
 export function isLoggedIn(req) {
-  return !!req.user; // More concise check for truthiness
+  return !!req.body.user; // More concise check for truthiness
 }
 
 // Function to check if the logged-in user is an admin
 export function isAdminValid(req) {
-  return req.user && req.user.type === UserType.ADMIN;
+  return req.body.user && req.body.user.type === UserType.ADMIN;
 }
 
 // Function to check if the logged-in user is a customer
 export function isCustomerValid(req) {
-  return req.user && req.user.type === UserType.CUSTOMER;
+  return req.body.user && req.body.user.type === UserType.CUSTOMER;
 }
 
 // Middleware for checking admin privileges
