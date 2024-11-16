@@ -1,21 +1,19 @@
 import GalleryItem from "../models/galleryItem.js";
 
-// Function to create a gallery item
 // Function to create a new gallery item
 export const createGalleryItem = async (req, res) => {
   try {
-    // Destructure the GalleryItem object from the request body, or use an empty object
-    const galleryItem = req.body.GalleryItem || {};
+    const { name, image, description } = req.body;
 
     // Validate GalleryItem structure
-    if (!galleryItem.name || !galleryItem.image || !galleryItem.description) {
+    if (!name || !image || !description) {
       return res.status(400).json({
         message: "Gallery item must include name, image, and description.",
       });
     }
 
     // Check if the gallery item with the same name already exists
-    const existingItem = await GalleryItem.findOne({ name: galleryItem.name });
+    const existingItem = await GalleryItem.findOne({ name });
     if (existingItem) {
       return res.status(400).json({
         message: "A gallery item with this name already exists.",
@@ -23,7 +21,11 @@ export const createGalleryItem = async (req, res) => {
     }
 
     // Create a new gallery item
-    const newGalleryItem = new GalleryItem(galleryItem);
+    const newGalleryItem = new GalleryItem({
+      name,
+      image,
+      description,
+    });
     await newGalleryItem.save();
 
     // Respond with a success message
@@ -54,7 +56,7 @@ export const getGalleryItem = async (req, res) => {
 
     // Respond with the list of gallery items
     res.status(200).json({
-      list: list,
+      items: list,
     });
   } catch (err) {
     // Handle errors during retrieval
