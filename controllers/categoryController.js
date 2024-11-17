@@ -171,3 +171,46 @@ export const updateCategory = async (req, res) => {
     });
   }
 };
+
+// Function to toggle the 'enabled' status of a category
+export const toggleCategoryStatus = async (req, res) => {
+  try {
+    const categoryName = req.params.name;
+
+    // Validate category name
+    if (!categoryName) {
+      return res.status(400).json({
+        message: "Category name is required.",
+      });
+    }
+
+    // Find the category by name
+    const category = await Category.findOne({ name: categoryName });
+
+    // Check if the category exists
+    if (!category) {
+      return res.status(404).json({
+        message: "Category not found.",
+      });
+    }
+
+    // Toggle the 'enabled' status
+    category.enabled = !category.enabled;
+
+    // Save the updated category
+    await category.save();
+
+    // Respond with success and the updated category
+    return res.status(200).json({
+      message: "Category status updated successfully.",
+      category: category, // Include the updated category in the response
+    });
+  } catch (error) {
+    console.error("Error toggling category status:", error);
+    return res.status(500).json({
+      message: "Failed to toggle category status.",
+      error: error.message,
+    });
+  }
+};
+

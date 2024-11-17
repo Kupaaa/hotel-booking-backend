@@ -22,6 +22,10 @@ const categorySchema = mongoose.Schema({
   image: {
     type: String,
   },
+  enabled: {
+    type: Boolean,
+    default: true, // New field to track whether the category is enabled or disabled
+  }
 });
 
 const Category = mongoose.model("Category", categorySchema);
