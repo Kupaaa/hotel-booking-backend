@@ -67,11 +67,10 @@ export const getGalleryItem = async (req, res) => {
   }
 };
 
-// Function to delete a gallery item
 export const deleteGalleryItem = async (req, res) => {
   try {
-    // Get the gallery item name from the request body
-    const galleryItemName = req.body.name;
+    // Get the gallery item name from the route parameters (not the body)
+    const galleryItemName = req.params.name;
 
     // Validate that the gallery item name is provided
     if (!galleryItemName) {
@@ -102,6 +101,7 @@ export const deleteGalleryItem = async (req, res) => {
     });
   }
 };
+
 
 // Function to update a gallery item
 export const updateGalleryItem = async (req, res) => {
