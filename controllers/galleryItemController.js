@@ -150,3 +150,39 @@ export const updateGalleryItem = async (req, res) => {
     });
   }
 };
+
+// Function to toggle enabled/disabled status of a gallery item
+export const toggleGalleryItemStatus = async (req, res) => {
+  try {
+    // Get the gallery item name from the route parameters
+    const galleryItemName = req.params.name;
+
+    // Find the gallery item by name
+    const galleryItem = await GalleryItem.findOne({ name: galleryItemName });
+
+    // Check if the gallery item exists
+    if (!galleryItem) {
+      return res.status(404).json({
+        message: "Gallery item not found.",
+      });
+    }
+
+    // Toggle the 'enabled' status
+    galleryItem.enabled = !galleryItem.enabled;
+
+    // Save the updated gallery item
+    await galleryItem.save();
+
+    // Respond with a success message and the updated gallery item
+    res.status(200).json({
+      message: "Gallery item status updated successfully.",
+      galleryItem,
+    });
+  } catch (error) {
+    console.log(error);
+    return res.status(500).json({
+      message: "Failed to update gallery item status.",
+      error: error.message,
+    });
+  }
+};
