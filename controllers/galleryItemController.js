@@ -41,26 +41,31 @@ export const createGalleryItem = async (req, res) => {
   }
 };
 
-// Function to get all gallery items
 export const getGalleryItem = async (req, res) => {
   try {
-    // Retrieve all gallery items from the database
-    const list = await GalleryItem.find();
+    // Get pageIndex and pageSize from the query params
+    const { pageIndex = 0, pageSize = 5 } = req.query;
 
-    // Check if the list is empty
-    if (list.length === 0) {
-      return res.status(404).json({
-        message: "No gallery items found.",
-      });
-    }
+    // Convert them to integers (in case they come as strings)
+    const page = parseInt(pageIndex, 10);
+    const size = parseInt(pageSize, 10);
 
-    // Respond with the list of gallery items
-    res.status(200).json({
-      items: list,
+    // Fetch the gallery items from the database with pagination
+    const items = await GalleryItem.find()
+      .skip(page * size) // Skip items before the current page
+      .limit(size); // Limit the number of items to pageSize
+
+    // Count the total number of gallery items for pagination
+    const totalCount = await GalleryItem.countDocuments();
+
+    // Respond with the paginated gallery items and total count
+    return res.status(200).json({
+      items: items,
+      totalCount: totalCount, // This will be used for pagination in frontend
     });
   } catch (err) {
-    // Handle errors during retrieval
-    res.status(500).json({
+    console.error("Error fetching gallery items:", err);
+    return res.status(500).json({
       message: "Failed to retrieve gallery items.",
       error: err.message,
     });
@@ -101,7 +106,6 @@ export const deleteGalleryItem = async (req, res) => {
     });
   }
 };
-
 
 // Function to update a gallery item
 export const updateGalleryItem = async (req, res) => {
@@ -167,8 +171,8 @@ export const toggleGalleryItemStatus = async (req, res) => {
       });
     }
 
-    // Toggle the 'enabled' status
-    galleryItem.enabled = !galleryItem.enabled;
+    // Toggle the 'disabled' status
+    galleryItem.disabled = !galleryItem.disabled; // This toggles the disabled status
 
     // Save the updated gallery item
     await galleryItem.save();

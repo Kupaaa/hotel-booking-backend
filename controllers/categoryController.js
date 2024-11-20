@@ -81,12 +81,25 @@ export const deleteCategory = async (req, res) => {
 // Function to get all categories
 export const getCategory = async (req, res) => {
   try {
-    // Fetch all categories from the database
-    const categories = await Category.find();
+    // Get pageIndex and pageSize from the query params
+    const { pageIndex = 0, pageSize = 5 } = req.query;
 
-    // Respond with the list of categories
+    // Convert them to integers (in case they come as strings)
+    const page = parseInt(pageIndex, 10);
+    const size = parseInt(pageSize, 10);
+
+    // Fetch the categories from the database with pagination
+    const categories = await Category.find()
+      .skip(page * size) // Skip items before the current page
+      .limit(size); // Limit the number of items to pageSize
+
+    // Count the total number of categories for pagination
+    const totalCount = await Category.countDocuments();
+
+    // Respond with the paginated categories and total count
     return res.status(200).json({
       categories: categories,
+      totalCount: totalCount, // This will be used for pagination in frontend
     });
   } catch (error) {
     console.error("Error fetching categories:", error);
@@ -194,8 +207,8 @@ export const toggleCategoryStatus = async (req, res) => {
       });
     }
 
-    // Toggle the 'enabled' status
-    category.enabled = !category.enabled;
+    // Toggle the 'disabled' status
+    category.disabled = !category.disabled;
 
     // Save the updated category
     await category.save();
@@ -203,7 +216,7 @@ export const toggleCategoryStatus = async (req, res) => {
     // Respond with success and the updated category
     return res.status(200).json({
       message: "Category status updated successfully.",
-      category: category, // Include the updated category in the response
+      category, // Include the updated category in the response
     });
   } catch (error) {
     console.error("Error toggling category status:", error);
@@ -213,4 +226,3 @@ export const toggleCategoryStatus = async (req, res) => {
     });
   }
 };
-

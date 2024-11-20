@@ -1,32 +1,35 @@
 import mongoose from "mongoose";
 
-const categorySchema = mongoose.Schema({
-  name: {
-    type: String,
-    required: true,
-    unique: true,
-  },
-  price: {
-    type: Number,
-    required: true,
-  },
-  features: [
-    {
+const categorySchema = mongoose.Schema(
+  {
+    name: {
+      type: String,
+      required: true,
+      unique: true,
+    },
+    price: {
+      type: Number,
+      required: true,
+    },
+    features: [
+      {
+        type: String,
+      },
+    ],
+    description: {
+      type: String,
+      required: true,
+    },
+    image: {
       type: String,
     },
-  ],
-  description: {
-    type: String,
-    required: true,
+    disabled: {
+      type: Boolean,
+      default: false,
+    },
   },
-  image: {
-    type: String,
-  },
-  enabled: {
-    type: Boolean,
-    default: true, // New field to track whether the category is enabled or disabled
-  }
-});
+  { timestamps: true }
+);
 
 const Category = mongoose.model("Category", categorySchema);
 export default Category;

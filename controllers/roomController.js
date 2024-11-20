@@ -46,10 +46,25 @@ export const createRoom = async (req, res) => {
 // Function to retrieve all rooms
 export const getRoom = async (req, res) => {
   try {
-    // Fetch all rooms from the database
-    const rooms = await Room.find();
+    // Get pageIndex and pageSize from the query params
+    const { pageIndex = 0, pageSize = 5 } = req.query;
+
+    // Convert them to integers (in case they come as strings)
+    const page = parseInt(pageIndex, 10);
+    const size = parseInt(pageSize, 10);
+
+    // Fetch the rooms from the database with pagination
+    const rooms = await Room.find()
+      .skip(page * size) // Skip items before the current page
+      .limit(size); // Limit the number of items to pageSize
+
+    // Count the total number of rooms for pagination
+    const totalCount = await Room.countDocuments();
+
+    // Respond with the paginated rooms and total count
     return res.status(200).json({
       rooms: rooms,
+      totalCount: totalCount, // This will be used for pagination in frontend
     });
   } catch (error) {
     console.log(error);
