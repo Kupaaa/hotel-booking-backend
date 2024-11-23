@@ -113,17 +113,17 @@ export const loginUser = async (req, res) => {
 // Function to delete a user
 export const deleteUser = async (req, res) => {
   try {
-    const email = req.params.email;
+    const userId = req.params.userId; // Expecting userId as parameter
 
-    // Validate email
-    if (!email) {
+    // Validate userId
+    if (!userId) {
       return res.status(400).json({
-        message: "Email is required.",
+        message: "User ID is required.",
       });
     }
 
-    // Delete the user
-    const deletedUser = await User.findOneAndDelete({ email: email });
+    // Delete the user by ID
+    const deletedUser = await User.findByIdAndDelete(userId); // Use findByIdAndDelete for ObjectId
 
     // Check if the user was found and deleted
     if (!deletedUser) {
@@ -132,14 +132,13 @@ export const deleteUser = async (req, res) => {
       });
     }
 
-    // Return success response
     return res.status(200).json({
       message: "User deleted successfully.",
     });
   } catch (error) {
-    console.error(error);
+    console.error("Error deleting user:", error);
     return res.status(500).json({
-      message: "User deletion failed.",
+      message: "Failed to delete user.",
       error: error.message,
     });
   }
@@ -196,25 +195,36 @@ export const updateUser = async (req, res) => {
   }
 };
 
-//  // list
-// export const getUserList = async (req, res) => {
-//   try {
-//     // Fetch the user list from the database
-//     const usersList = await User.find();
+export const getUsers = async (req, res) => {
+  try {
+    // Get pageIndex and pageSize from the query params
+    const { pageIndex = 0, pageSize = 5 } = req.query;
 
-//     // Return success response with the list of users
-//     return res.status(200).json({
-//       message: "User list retrieved successfully.",
-//       list: usersList,
-//     });
-//   } catch (error) {
-//     console.error(error);
-//     return res.status(500).json({
-//       message: "An error occurred while retrieving the user list.",
-//       error: error.message,
-//     });
-//   }
-// };
+    // Convert them to integers (in case they come as strings)
+    const page = parseInt(pageIndex, 10);
+    const size = parseInt(pageSize, 10);
+
+    // Fetch the users from the database with pagination
+    const users = await User.find()
+      .skip(page * size) // Skip items before the current page
+      .limit(size); // Limit the number of items to pageSize
+
+    // Count the total number of users for pagination
+    const totalCount = await User.countDocuments();
+
+    // Respond with the paginated users and total count
+    return res.status(200).json({
+      users: users,
+      totalCount: totalCount, // This will be used for pagination in frontend
+    });
+  } catch (error) {
+    console.log(error);
+    return res.status(500).json({
+      message: "Failed to retrieve users.",
+      error: error.message,
+    });
+  }
+};
 
 // Function to retrieve a user by their email address
 export const getUserByEmail = async (req, res) => {
@@ -255,7 +265,7 @@ export const getUserByEmail = async (req, res) => {
 
 // Function to get user
 export async function getUser(req, res) {
-  const user = req.body.user; 
+  const user = req.body.user;
 
   if (!user) {
     // Respond with a "not found" message if no user is provided
@@ -271,4 +281,99 @@ export async function getUser(req, res) {
   }
 }
 
+// Function to toggle enabled/disabled status of a user
+export const toggleUserStatus = async (req, res) => {
+  try {
+    const { email } = req.params; // Use email as the unique identifier
 
+    console.log("Email received:", req.params.email);
+
+    // Find the user by email
+    const user = await User.findOne({ email });
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    // Toggle the disabled status
+    user.disabled = !user.disabled;
+    await user.save();
+
+    return res.status(200).json({
+      message: `User status ${
+        user.disabled ? "disabled" : "enabled"
+      } successfully`,
+      user,
+    });
+  } catch (error) {
+    console.error("Error toggling user status:", error);
+    return res.status(500).json({
+      message: "An error occurred while updating user status",
+      error: error.message,
+    });
+  }
+};
+
+// >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+
+// blockUser Function
+export const blockUser = async (req, res) => {
+  try {
+    const { email } = req.params; // Use email as the identifier
+    const { reason } = req.body; // Optional reason for blocking
+
+    // Find the user by email
+    const user = await User.findOne({ email });
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    // Block the user
+    user.blocked = true;
+    user.blockReason = reason || "No reason provided";
+    user.blockedAt = new Date();
+
+    await user.save();
+
+    return res.status(200).json({
+      message: "User blocked successfully",
+      user,
+    });
+  } catch (error) {
+    console.error("Error blocking user:", error);
+    return res.status(500).json({
+      message: "An error occurred while blocking the user",
+      error: error.message,
+    });
+  }
+};
+
+// unblockUser Function
+export const unblockUser = async (req, res) => {
+  try {
+    const { email } = req.params; // Use email as the identifier
+
+    // Find the user by email
+    const user = await User.findOne({ email });
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    // Unblock the user
+    user.blocked = false;
+    user.blockReason = null;
+    user.blockedAt = null;
+
+    await user.save();
+
+    return res.status(200).json({
+      message: "User unblocked successfully",
+      user,
+    });
+  } catch (error) {
+    console.error("Error unblocking user:", error);
+    return res.status(500).json({
+      message: "An error occurred while unblocking the user",
+      error: error.message,
+    });
+  }
+};
