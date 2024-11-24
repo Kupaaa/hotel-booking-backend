@@ -49,10 +49,12 @@ const userSchema = mongoose.Schema({
       message: (props) => `${props.value} is not a valid WhatsApp number!`,
     },
   },
+
   type: {
     type: String,
     required: true,
-    default: "customer",
+    enum: ["Admin", "Customer"], // Role-based restriction
+    default: "Customer", // Default to Customer
   },
   disabled: {
     type: Boolean,

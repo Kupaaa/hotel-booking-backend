@@ -9,10 +9,9 @@ export const createUser = async (req, res) => {
   try {
     const userData = req.body;
 
-    if (!userData.password) {
-      return res.status(400).json({
-        message: "Password is required.",
-      });
+    // Convert email to lowercase for consistent storage
+    if (userData.email) {
+      userData.email = userData.email.toLowerCase();
     }
 
     // Validate required fields
@@ -20,12 +19,24 @@ export const createUser = async (req, res) => {
       !userData.email ||
       !userData.firstName ||
       !userData.lastName ||
-      !userData.phone
+      !userData.phone ||
+      !userData.password
     ) {
       return res.status(400).json({
-        message: "Email, first name, last name, and phone are required.",
+        message:
+          "Email, first name, last name, phone, and password are required.",
       });
     }
+
+    // Validate the role field
+    if (!userData.role || !["Admin", "Customer"].includes(userData.role)) {
+      return res.status(400).json({
+        message: "Invalid role. Role must be 'Admin' or 'Customer'.",
+      });
+    }
+
+    // Explicitly set the type field from the role
+    userData.type = userData.role;
 
     // Check if user already exists by email
     const existingUser = await User.findOne({ email: userData.email });
@@ -40,11 +51,21 @@ export const createUser = async (req, res) => {
     userData.password = passwordHash;
 
     // Create and save the new user
-    const newUser = new User(userData);
+    const newUser = new User({
+      ...userData, // Include all fields, including role
+    });
     await newUser.save();
 
     res.status(201).json({
       message: "User created successfully.",
+      user: {
+        id: newUser._id,
+        firstName: newUser.firstName,
+        lastName: newUser.lastName,
+        email: newUser.email,
+        phone: newUser.phone,
+        role: newUser.type, // Include role in the response
+      },
     });
   } catch (error) {
     console.error(error);
@@ -87,7 +108,6 @@ export const loginUser = async (req, res) => {
 
     // Generate a JWT token with a 14-hour expiration
     const token = jwt.sign(payload, process.env.JWT_KEY, { expiresIn: "14h" });
-    console.log("Generated Token:", token); // Log the token for debugging purposes (avoid this in production)
 
     // Respond with a success message, the user's details, and the generated token
     res.status(200).json({
@@ -113,17 +133,17 @@ export const loginUser = async (req, res) => {
 // Function to delete a user
 export const deleteUser = async (req, res) => {
   try {
-    const userId = req.params.userId; // Expecting userId as parameter
+    const email = req.params.email; // Get email from the route parameter
 
-    // Validate userId
-    if (!userId) {
+    // Validate that the email is provided
+    if (!email) {
       return res.status(400).json({
-        message: "User ID is required.",
+        message: "Email is required.",
       });
     }
 
-    // Delete the user by ID
-    const deletedUser = await User.findByIdAndDelete(userId); // Use findByIdAndDelete for ObjectId
+    // Delete the user by email
+    const deletedUser = await User.findOneAndDelete({ email }); // Use email to find and delete
 
     // Check if the user was found and deleted
     if (!deletedUser) {
@@ -143,6 +163,7 @@ export const deleteUser = async (req, res) => {
     });
   }
 };
+
 
 // Function to update a user
 export const updateUser = async (req, res) => {
@@ -230,8 +251,6 @@ export const getUsers = async (req, res) => {
 export const toggleUserStatus = async (req, res) => {
   try {
     const { email } = req.params; // Use email as the unique identifier
-
-    console.log("Email received:", req.params.email);
 
     // Find the user by email
     const user = await User.findOne({ email });
