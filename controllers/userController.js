@@ -164,7 +164,6 @@ export const deleteUser = async (req, res) => {
   }
 };
 
-
 // Function to update a user
 export const updateUser = async (req, res) => {
   try {
@@ -190,6 +189,28 @@ export const updateUser = async (req, res) => {
     // Destructure possible fields to update from the request body
     const { firstName, lastName, phone, whatsApp, image, type, disabled } =
       req.body;
+
+    // Backend validation: Check for required fields and valid formats
+    if (firstName && typeof firstName !== "string") {
+      return res.status(400).json({ message: "Invalid first name." });
+    }
+    if (lastName && typeof lastName !== "string") {
+      return res.status(400).json({ message: "Invalid last name." });
+    }
+    if (phone && !/^\+?[1-9]\d{1,14}$/.test(phone)) {
+      return res.status(400).json({ message: "Invalid phone number." });
+    }
+    if (whatsApp && !/^\+?[1-9]\d{1,14}$/.test(whatsApp)) {
+      return res.status(400).json({ message: "Invalid WhatsApp number." });
+    }
+    if (type && !["Admin", "Customer"].includes(type)) {
+      return res.status(400).json({ message: "Invalid user type." });
+    }
+    if (disabled !== undefined && typeof disabled !== "boolean") {
+      return res
+        .status(400)
+        .json({ message: "Invalid value for disabled field." });
+    }
 
     // Update fields only if they are provided in the request
     if (firstName) user.firstName = firstName;
