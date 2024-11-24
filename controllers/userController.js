@@ -55,43 +55,42 @@ export const createUser = async (req, res) => {
   }
 };
 
-// Function to login a user
+// Function to handle user login
 export const loginUser = async (req, res) => {
   try {
-    const credential = req.body;
+    // Extract email and password from the request body
+    const { email, password } = req.body;
 
-    const user = await User.findOne({ email: credential.email });
-
-    if (!user) {
-      return res.status(404).json({
-        message: "User not found.",
-      });
+    // Validate that both email and password are provided
+    if (!email || !password) {
+      return res
+        .status(400)
+        .json({ message: "Email and password are required." }); // Respond with 400 Bad Request if missing
     }
 
-    // Verify password
-    const isPasswordValid = await argon2.verify(
-      user.password,
-      credential.password
-    );
-    if (!isPasswordValid) {
-      return res.status(401).json({
-        message: "Invalid credentials.",
-      });
+    // Find the user in the database by their email
+    const user = await User.findOne({ email });
+
+    // If the user is not found or the password is incorrect, respond with 401 Unauthorized
+    if (!user || !(await argon2.verify(user.password, password))) {
+      return res.status(401).json({ message: "Invalid email or password." }); // Generic message to avoid exposing sensitive info
     }
 
-    // Payload for JWT
+    // Create a payload with user details for the JWT token
     const payload = {
-      id: user._id,
-      email: user.email,
-      firstName: user.firstName,
-      lastName: user.lastName,
-      type: user.type,
+      id: user._id, // User's unique ID
+      email: user.email, // User's email
+      firstName: user.firstName, // User's first name
+      lastName: user.lastName, // User's last name
+      type: user.type, // User's role or type
     };
 
-    // Sign the JWT token
+    // Generate a JWT token with a 14-hour expiration
     const token = jwt.sign(payload, process.env.JWT_KEY, { expiresIn: "14h" });
+    console.log("Generated Token:", token); // Log the token for debugging purposes (avoid this in production)
 
-    res.json({
+    // Respond with a success message, the user's details, and the generated token
+    res.status(200).json({
       message: "User logged in successfully.",
       user: {
         id: user._id,
@@ -100,13 +99,14 @@ export const loginUser = async (req, res) => {
         lastName: user.lastName,
         type: user.type,
       },
-      token,
+      token, // Include the JWT token in the response
     });
   } catch (error) {
-    res.status(500).json({
-      message: "Login failed.",
-      error: error.message,
-    });
+    // Log the error for debugging
+    console.error("Login error:", error.message);
+
+    // Respond with a 500 Internal Server Error for unexpected issues
+    res.status(500).json({ message: "Login failed.", error: error.message });
   }
 };
 
@@ -226,61 +226,6 @@ export const getUsers = async (req, res) => {
   }
 };
 
-// Function to retrieve a user by their email address
-export const getUserByEmail = async (req, res) => {
-  try {
-    // Extract the email parameter from the request
-    const email = req.params.email;
-
-    // Validate that an email was provided
-    if (!email) {
-      return res.status(400).json({
-        message: "Email is required.",
-      });
-    }
-
-    // Attempt to find the user by their email address
-    const user = await User.findOne({ email });
-
-    // Check if the user was found
-    if (!user) {
-      return res.status(404).json({
-        message: "User not found.",
-      });
-    }
-
-    // Return a success response with the user details
-    return res.status(200).json({
-      message: "User retrieved successfully.",
-      user, // Include the user details in the response
-    });
-  } catch (error) {
-    console.error(error);
-    return res.status(500).json({
-      message: "An error occurred while retrieving user details.",
-      error: error.message,
-    });
-  }
-};
-
-// Function to get user
-export async function getUser(req, res) {
-  const user = req.body.user;
-
-  if (!user) {
-    // Respond with a "not found" message if no user is provided
-    return res.status(404).json({
-      message: "User not found",
-    });
-  } else {
-    // Respond with the found user
-    return res.status(200).json({
-      message: "User found",
-      user: user,
-    });
-  }
-}
-
 // Function to toggle enabled/disabled status of a user
 export const toggleUserStatus = async (req, res) => {
   try {
@@ -374,6 +319,43 @@ export const unblockUser = async (req, res) => {
     return res.status(500).json({
       message: "An error occurred while unblocking the user",
       error: error.message,
+    });
+  }
+};
+
+// Controller to retrieve details of the currently authenticated user
+export const getCurrentUser = async (req, res) => {
+  try {
+    // Ensure the user information is available in the request object
+    if (!req.user || !req.user.id) {
+      return res.status(401).json({ message: "Unauthorized access" }); // Respond with 401 if the user is not authenticated
+    }
+
+    // Fetch the user's details from the database using their ID
+    // Only select specific fields (firstName, lastName, profileImage, email) to optimize the query
+    const user = await User.findById(
+      req.user.id,
+      "firstName lastName profileImage email"
+    );
+
+    // If no user is found, respond with a 404 Not Found error
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    // Respond with the user's details and a success message
+    return res.status(200).json({
+      message: "User retrieved successfully",
+      user, // Include the retrieved user data in the response
+    });
+  } catch (error) {
+    // Log any unexpected errors to the server console for debugging
+    console.error("Error in getCurrentUser:", error.message);
+
+    // Respond with a 500 Internal Server Error for unexpected issues
+    return res.status(500).json({
+      message: "Failed to retrieve user details",
+      error: error.message, // Include the error message for debugging (optional, consider excluding in production)
     });
   }
 };
