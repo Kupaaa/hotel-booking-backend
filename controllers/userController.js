@@ -187,7 +187,7 @@ export const updateUser = async (req, res) => {
     }
 
     // Destructure possible fields to update from the request body
-    const { firstName, lastName, phone, whatsApp, image, type, disabled } =
+    const { firstName, lastName, phone, whatsApp, image, role, disabled } =
       req.body;
 
     // Backend validation: Check for required fields and valid formats
@@ -203,8 +203,8 @@ export const updateUser = async (req, res) => {
     if (whatsApp && !/^\+?[1-9]\d{1,14}$/.test(whatsApp)) {
       return res.status(400).json({ message: "Invalid WhatsApp number." });
     }
-    if (type && !["Admin", "Customer"].includes(type)) {
-      return res.status(400).json({ message: "Invalid user type." });
+    if (role && !["Admin", "Customer"].includes(role)) {
+      return res.status(400).json({ message: "Invalid user role." });
     }
     if (disabled !== undefined && typeof disabled !== "boolean") {
       return res
@@ -212,24 +212,29 @@ export const updateUser = async (req, res) => {
         .json({ message: "Invalid value for disabled field." });
     }
 
-    // Update fields only if they are provided in the request
-    if (firstName) user.firstName = firstName;
-    if (lastName) user.lastName = lastName;
-    if (phone) user.phone = phone;
-    if (whatsApp) user.whatsApp = whatsApp;
-    if (image) user.image = image;
-    if (type) user.type = type;
-    if (disabled !== undefined) user.disabled = disabled;
+    // Prepare updates object with fields that need to be updated
+    const updates = {};
+    if (firstName) updates.firstName = firstName;
+    if (lastName) updates.lastName = lastName;
+    if (phone) updates.phone = phone;
+    if (whatsApp) updates.whatsApp = whatsApp;
+    if (image) updates.image = image;
+    if (role) updates.type = role; // Map 'role' to 'type' to match the backend field name
+    if (disabled !== undefined) updates.disabled = disabled;
 
-    await user.save();
+    // Update the user document with the new fields
+    await User.updateOne({ email }, { $set: updates });
+
+    // Fetch the updated user from the database to return in the response
+    const updatedUser = await User.findOne({ email });
 
     // Return success response with updated user
     return res.status(200).json({
       message: "User updated successfully.",
-      user,
+      user: updatedUser,
     });
   } catch (error) {
-    console.log(error);
+    console.error("Error in updateUser:", error);
     return res.status(500).json({
       message: "User update failed.",
       error: error.message,
